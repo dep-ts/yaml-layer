@@ -1,0 +1,36 @@
+{
+  "name": "@dep/yaml-layer",
+  "version": "1.0.0",
+  "description": "A lightweight Deno-based tool that transforms YAML content into typed JSON artifacts and generates a central TypeScript entry point for easy data access.",
+  "exports": {
+    ".": "./src/mod.ts",
+    "./cli": "./src/cli.ts"
+  },
+  "author": {
+    "name": "Estarlin R.",
+    "email": "dev@estarlincito.com",
+    "url": "https://estarlincito.com"
+  },
+  "homepage": "https://github.com/dep-ts/yaml-layer#readme",
+  "repository": "https://github.com/dep-ts/yaml-layer",
+  "bugs": "https://github.com/dep-ts/yaml-layer/issues",
+  "keywords": [
+    "yaml",
+    "yml",
+    "content-layer",
+    "static-site-generation",
+    "ssg",
+    "typescript",
+    "deno",
+    "type-safe-data",
+    "cms",
+    "git-based-cms",
+    "json-generator",
+    "watcher"
+  ],
+  "license": "MIT",
+  "publish": {
+    "include": ["src", "LICENSE", "README.md"],
+    "exclude": ["**/tests/**"]
+  }
+}

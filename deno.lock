@@ -1,0 +1,84 @@
+{
+  "version": "5",
+  "specifiers": {
+    "jsr:@dep/cache@1": "1.0.0",
+    "jsr:@dep/command@3": "3.0.0",
+    "jsr:@dep/path@1": "1.0.0",
+    "jsr:@dep/slug@1": "1.0.0",
+    "jsr:@dep/table@^1.0.1": "1.0.1",
+    "jsr:@dep/text@1": "1.0.0",
+    "jsr:@std/fmt@^1.0.9": "1.0.9",
+    "jsr:@std/fs@^1.0.19": "1.0.23",
+    "jsr:@std/fs@^1.0.23": "1.0.23",
+    "jsr:@std/internal@^1.0.12": "1.0.12",
+    "jsr:@std/path@^1.1.2": "1.1.4",
+    "jsr:@std/path@^1.1.4": "1.1.4",
+    "jsr:@std/yaml@^1.0.12": "1.0.12"
+  },
+  "jsr": {
+    "@dep/cache@1.0.0": {
+      "integrity": "5eb4e78230d265e6d9bd96a72ebecd2ef00174c30a925e77d011c665ce4ee90d",
+      "dependencies": [
+        "jsr:@dep/text"
+      ]
+    },
+    "@dep/command@3.0.0": {
+      "integrity": "4808234f47f57a23098cf7ff4eb066728c1e54f8dd72bf502afada2dffe5a03f",
+      "dependencies": [
+        "jsr:@dep/table"
+      ]
+    },
+    "@dep/path@1.0.0": {
+      "integrity": "c0989d2461a5520d34fc8c186e0ca35ff39e3ac8dd007d56d65a75b0b05f6cb3",
+      "dependencies": [
+        "jsr:@std/path@^1.1.4"
+      ]
+    },
+    "@dep/slug@1.0.0": {
+      "integrity": "b14b497bcbb0503b66e1d012054978c186d4dcc8dc1d57bd70c1b370609a7d6c"
+    },
+    "@dep/table@1.0.1": {
+      "integrity": "f0855dc71b9dc1b2e83930a47c2ac0295739e1a970a5de7135e7eb7f23942745"
+    },
+    "@dep/text@1.0.0": {
+      "integrity": "9e7029f5209480293df59b4173804675f22390fb10d35dc96f343c5487230f65",
+      "dependencies": [
+        "jsr:@std/fs@^1.0.19",
+        "jsr:@std/path@^1.1.2"
+      ]
+    },
+    "@std/fmt@1.0.9": {
+      "integrity": "2487343e8899fb2be5d0e3d35013e54477ada198854e52dd05ed0422eddcabe0"
+    },
+    "@std/fs@1.0.23": {
+      "integrity": "3ecbae4ce4fee03b180fa710caff36bb5adb66631c46a6460aaad49515565a37",
+      "dependencies": [
+        "jsr:@std/internal",
+        "jsr:@std/path@^1.1.4"
+      ]
+    },
+    "@std/internal@1.0.12": {
+      "integrity": "972a634fd5bc34b242024402972cd5143eac68d8dffaca5eaa4dba30ce17b027"
+    },
+    "@std/path@1.1.4": {
+      "integrity": "1d2d43f39efb1b42f0b1882a25486647cb851481862dc7313390b2bb044314b5",
+      "dependencies": [
+        "jsr:@std/internal"
+      ]
+    },
+    "@std/yaml@1.0.12": {
+      "integrity": "7deabca4545bcedd07c5f69ea53acea71b8b4c67562f224e17b90d75944cb20c"
+    }
+  },
+  "workspace": {
+    "dependencies": [
+      "jsr:@dep/cache@1",
+      "jsr:@dep/command@3",
+      "jsr:@dep/path@1",
+      "jsr:@dep/slug@1",
+      "jsr:@std/fmt@^1.0.9",
+      "jsr:@std/fs@^1.0.23",
+      "jsr:@std/yaml@^1.0.12"
+    ]
+  }
+}

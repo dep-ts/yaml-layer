@@ -1,8 +1,10 @@
 import { parseYAML } from "@/utils/parse.ts";
 import { getMtime } from "@/utils/mtime.ts";
 import { useCache } from "@/utils/cache.ts";
+import { slug } from "@dep/slug";
 import * as fs from "@std/fs";
 import * as path from "@dep/path";
+import { formatPathIdentifier } from "@/utils/format.ts";
 import { logDirNotFound } from "@/utils/log.ts";
 
 import { generateJsonImports, ImportsMap } from "@/utils/main.ts";
@@ -36,45 +38,38 @@ export interface Options {
  */
 export async function builder(opt: Options = {}): Promise<void> {
   const contentDir = opt.contentDir ?? "./content";
+  const outDir = opt.outDir ?? ".yaml-layer";
+  const docType = opt.docType ?? "Content";
+  const configHash = `${contentDir}$${outDir}$${docType}`;
+  const cache = await useCache(outDir);
+  const cachedConfig = await cache.get("config");
+  const importsMap: ImportsMap = {};
+  const absoluteContentPath = path.resolve(contentDir);
+  let hasChanges = false;
 
   if (!fs.existsSync(contentDir)) {
     logDirNotFound(contentDir);
     return;
   }
 
-  const outDir = opt.outDir ?? ".yaml-layer";
-  const docType = opt.docType ?? "Content";
-
-  const cache = await useCache(outDir);
-  const importsMap: ImportsMap = {};
-  let hasChanges = false;
-
-  const absoluteContentPath = path.resolve(contentDir);
-
   for await (const entry of fs.expandGlob(`${contentDir}/**/*.+(yaml|yml)`)) {
-    const yamlData = await parseYAML(entry);
     const mtimeNum = Number(await getMtime(entry.path));
+    const cachedMtime = await cache.get(entry.path);
 
-    const relativeFromContent = path.relative(absoluteContentPath, entry.path);
-    const relativeDir = path.dirname(relativeFromContent);
-    const topLevelDir = relativeDir === "."
-      ? ""
-      : relativeDir.split(path.SEPARATOR)[0];
+    const relativeToContent = path.relative(absoluteContentPath, entry.path);
+    const jsonFile = relativeToContent.replace(/\.ya?ml$/, ".json");
+    const outputPath = path.join(outDir, jsonFile);
+    const internalDir = path.dirname(relativeToContent);
 
-    const generatedDir = path.join(outDir, "generated", relativeDir);
-    const fileName = `${yamlData._slug}.json`;
-    const outputPath = path.join(generatedDir, fileName);
+    const groupName = `${docType}${formatPathIdentifier(internalDir)}`;
+    const importIdentifier = slug(jsonFile, { separator: "" });
 
-    const groupName = `${topLevelDir}${docType}`;
-    const importIdentifier = topLevelDir
-      ? `${topLevelDir}_${yamlData._slug}`
-      : `${yamlData._slug}`;
-
-    if ((await cache.get(entry.path)) !== mtimeNum) {
+    if (cachedMtime !== mtimeNum || cachedConfig !== configHash) {
+      const yamlData = await parseYAML(entry);
       hasChanges = true;
 
-      if (!fs.existsSync(generatedDir)) {
-        await Deno.mkdir(generatedDir, { recursive: true });
+      if (!fs.existsSync(path.join(outDir, internalDir))) {
+        await Deno.mkdir(path.join(outDir, internalDir), { recursive: true });
       }
 
       await Deno.writeTextFile(outputPath, JSON.stringify(yamlData, null, 2));
@@ -82,11 +77,11 @@ export async function builder(opt: Options = {}): Promise<void> {
     }
 
     importsMap[groupName] ??= {};
-    const relativeImportPath = `./${path.join(topLevelDir, fileName)}`;
-    importsMap[groupName][importIdentifier] = relativeImportPath;
+    importsMap[groupName][importIdentifier] = `./${jsonFile}`;
   }
 
   if (hasChanges) {
     await generateJsonImports(importsMap, outDir);
+    await cache.set("config", configHash);
   }
 }

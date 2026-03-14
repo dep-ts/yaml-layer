@@ -67,14 +67,14 @@ await watcher(options);
 
 ### Consuming Generated Data
 
-After running the tool, you can import your data directly from the generated
+After running the tool, you can import your data directly from the out
 directory:
 
 ```typescript
-import { Content, ProjectsContent } from "./.yaml-layer/generated/main.ts";
+import { ContentProjects, ContentRoot } from "./.yaml-layer/main.ts";
 
-console.log(Content); // Array of JSON objects from the root content dir
-console.log(ProjectsContent); // Array of JSON objects from the 'projects/' sub-dir
+console.log(ContentRoot); // Array of JSON objects from the root content dir
+console.log(ContentProjects); // Array of JSON objects from the 'projects/' sub-dir
 ```
 
 ---

@@ -52,5 +52,3 @@ try {
   }
   throw err;
 }
-
-//deno --allow-all src/cli.ts b -w

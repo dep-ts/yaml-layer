@@ -16,5 +16,5 @@ export async function generateJsonImports(
     lines.push(`export const ${group} = [${names.join(", ")}];`);
   }
 
-  await Deno.writeTextFile(`${outDir}/generated/main.ts`, lines.join("\n"));
+  await Deno.writeTextFile(`${outDir}/main.ts`, lines.join("\n"));
 }

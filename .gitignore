@@ -3,6 +3,8 @@
 /.pnp
 .pnp.js
 /coverage
+/content
+/.yaml-layer
 /out/
 .DS_Store
 *.pem

@@ -7,15 +7,17 @@
 
 ## Features ✨
 
-- ⚡ **Lightning Fast**: Incremental builds using a disk-based caching system.
-- 🔄 **Live Reload**: Built-in watcher that automatically regenerates artifacts
-  on file changes.
-- 📂 **Auto-Grouping**: Automatically organizes imports based on your directory
-  structure.
-- 🆔 **Slug Generation**: Automatically adds URL-friendly slugs and file
-  metadata to your content.
-- 📦 **Type-Safe**: Generates a `main.ts` file using the latest
-  `with { type: "json" }` import attributes.
+- 📂 **Auto-Discovery**: Scans directories for `.yaml` and `.yml` files
+  recursively.
+- ⚡ **Blazing Fast**: Uses a disk-based cache system to only rebuild modified
+  files.
+- 🛠️ **Data Transformation**: Hook into the build process to modify or extend
+  your data.
+- 🛡️ **Schema Validation**: Integration with `@dep/schema` to ensure content
+  integrity.
+- 🔄 **Watch Mode**: Real-time rebuilding as you edit your content files.
+- 📦 **Type-Safe Imports**: Generates a `main.ts` file with grouped JSON
+  imports.
 
 ---
 
@@ -23,10 +25,22 @@
 
 - **Deno**:
 
-```bash
-deno add jsr:@dep/yaml-layer
-deno install -A -n yaml-layer jsr:@dep/yaml-layer/cli
-```
+  ```bash
+  deno add jsr:@dep/yaml-layer
+  deno install -A -n yaml-layer jsr:@dep/yaml-layer/cli
+  ```
+
+- **Node.js (18+) or Bun**:
+
+  ```bash
+  npx jsr add @dep/yaml-layer
+  ```
+
+  Then import as an ES module:
+
+  ```typescript
+  import { builder, defineConfig } from '@dep/yaml-layer';
+  ```
 
 ---
 
@@ -34,54 +48,69 @@ deno install -A -n yaml-layer jsr:@dep/yaml-layer/cli
 
 ### CLI 💻
 
-The CLI is the easiest way to manage your content pipeline.
+Run the build process or start the watcher directly from your terminal:
 
 ```bash
-# Build once
-yaml-layer build --contentDir ./my-content --outDir .output
+# Basic build
+yaml-layer build
 
-# Watch for changes (short flags)
-yaml-layer b -w -d Post
+# Build with custom options
+yaml-layer build ./content --outDir ./dist --docType Blog
+
+# Watch for changes
+yaml-layer build --watch
 ```
 
 ### API 🧩
 
-You can integrate the builder directly into your Deno scripts (e.g., in a
-`dev.ts` or `build.ts` file).
+#### Configuration File
+
+Create a `yaml-layer.config.ts` in your root directory for advanced setups:
 
 ```typescript
-import { builder, watcher } from "@dep/yaml-layer";
+import { defineConfig } from '@dep/yaml-layer';
+import { s } from '@dep/schema';
 
-const options = {
-  contentDir: "./content",
-  outDir: ".yaml-layer",
-  docType: "Blog", // Resulting export will be 'Blog' or 'FolderBlog'
-};
-
-// Start watching for changes
-await watcher(options);
-
-// Or run a single build
-// await builder(options);
+export default defineConfig({
+  contentDir: './content',
+  outDir: './.generated',
+  schema: s.object({
+    title: s.string(),
+    date: s.date(),
+    draft: s.boolean().optional(),
+  }),
+  transform: (entry) => {
+    return {
+      ...entry,
+      readingTime: Math.ceil(entry._raw.length / 500),
+    };
+  },
+});
 ```
 
-### Consuming Generated Data
+#### Programmatic Usage
 
-After running the tool, you can import your data directly from the out
-directory:
+You can also trigger the builder or watcher directly in your scripts:
 
 ```typescript
-import { ContentProjects, ContentRoot } from "./.yaml-layer/main.ts";
+import { builder, watcher } from '@dep/yaml-layer';
 
-console.log(ContentRoot); // Array of JSON objects from the root content dir
-console.log(ContentProjects); // Array of JSON objects from the 'projects/' sub-dir
+// Run a single build
+await builder({
+  contentDir: './docs',
+  outDir: './data',
+});
+
+// Or start a watcher
+await watcher({
+  contentDir: './docs',
+});
 ```
 
 ---
 
 ## License 📄
 
-MIT License – see [LICENSE](https://www.google.com/search?q=LICENSE) for
-details.
+MIT License – see [LICENSE](LICENSE) for details.
 
 **Author:** Estarlin R ([estarlincito.com](https://estarlincito.com))

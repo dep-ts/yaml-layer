@@ -1,6 +1,6 @@
-import { parse } from "@std/yaml/parse";
-import { WalkEntry } from "@std/fs";
-import { slug } from "@dep/slug";
+import { parse } from '@std/yaml/parse';
+import { WalkEntry } from '@std/fs';
+import { slug } from '@dep/slug';
 
 export async function parseYAML(file: WalkEntry) {
   const _slug = slug(file.name.split(/\.yaml|\.yml/)[0]);

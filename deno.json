@@ -1,6 +1,6 @@
 {
   "name": "@dep/yaml-layer",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "exports": {
     ".": "./src/mod.ts",
     "./cli": "./src/cli.ts"
@@ -12,12 +12,13 @@
     "@/": "./src/",
     "@dep/command": "jsr:@dep/command@^3.0.0",
     "@dep/path": "jsr:@dep/path@^1.0.0",
+    "@dep/schema": "jsr:@dep/schema@^1.0.2",
     "@dep/yaml-layer/generated": "./.yaml-layer/generated/main.ts",
     "@dep/cache": "jsr:@dep/cache@^1.0.0",
     "@dep/slug": "jsr:@dep/slug@^1.1.0",
-    "@std/fmt": "jsr:@std/fmt@^1.0.9",
+    "@std/fmt": "jsr:@std/fmt@^1.0.10",
     "@std/fs": "jsr:@std/fs@^1.0.23",
-    "@std/yaml": "jsr:@std/yaml@^1.0.12"
+    "@std/yaml": "jsr:@std/yaml@^1.1.0"
   },
   "tasks": {
     "start": "deno run --allow-all src/main.ts",
@@ -36,5 +37,13 @@
     "rules": {
       "tags": ["recommended"]
     }
+  },
+  "fmt": {
+    "useTabs": false,
+    "lineWidth": 80,
+    "indentWidth": 2,
+    "singleQuote": true,
+    "semiColons": true,
+    "trailingCommas": "onlyMultiLine"
   }
 }

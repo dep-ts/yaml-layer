@@ -13,8 +13,8 @@ export async function generateJsonImports(
       lines.push(`import ${name} from '${path}' with { type: 'json' };`);
     }
 
-    lines.push(`export const ${group} = [${names.join(", ")}];`);
+    lines.push(`export const ${group} = [${names.join(', ')}];`);
   }
 
-  await Deno.writeTextFile(`${outDir}/main.ts`, lines.join("\n"));
+  await Deno.writeTextFile(`${outDir}/main.ts`, lines.join('\n'));
 }

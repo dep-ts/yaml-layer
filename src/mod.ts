@@ -1,2 +1,8 @@
-export { builder, type Options } from "./core/builder.ts";
-export { watcher } from "./core/watcher.ts";
+export { builder } from './core/builder.ts';
+export { watcher } from './core/watcher.ts';
+export {
+  type ContentEntry,
+  defineConfig,
+  loadConfig,
+  type YamlLayerConfig,
+} from './core/config.ts';

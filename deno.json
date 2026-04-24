@@ -1,6 +1,6 @@
 {
   "name": "@dep/yaml-layer",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "exports": {
     ".": "./src/mod.ts",
     "./cli": "./src/cli.ts"
@@ -29,7 +29,7 @@
     "lint": "deno lint",
     "fmt": "deno fmt",
     "clean": "rm -rf .yaml-layer",
-    "pack": "deno compile -A -o yaml-layer ./cli.ts",
+    "pack": "deno compile -A -o yaml-layer ./src/cli.ts",
     "prerelease": "deno lint && deno fmt",
     "release": "deno task prerelease && jsr publish ./"
   },

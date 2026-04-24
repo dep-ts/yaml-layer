@@ -1,6 +1,8 @@
 // deno-lint-ignore-file no-explicit-any
 import type { ObjectSchema } from '@dep/schema';
 import { resolveConfigPath } from '@/utils/path.ts';
+import { toFileUrl } from '@dep/path';
+import { bold, cyan, red } from '@std/fmt/colors';
 
 /**
  * Represents the standard structure of a processed YAML entry.
@@ -54,17 +56,25 @@ export async function loadConfig(
 ): Promise<YamlLayerConfig & { configPath?: string }> {
   const filePath = resolveConfigPath(configPath);
 
-  try {
-    if (filePath) {
-      const mod = await import(filePath);
+  if (!filePath) {
+    return {};
+  }
 
-      if (mod.default && typeof mod.default === 'object') {
-        return { ...mod.default, configPath: filePath };
-      }
+  try {
+    const fileUrl = toFileUrl(filePath);
+    const modulePath = `${fileUrl.href}?update=${Date.now()}`;
+    const mod = await import(modulePath);
+    const config = mod.default ?? mod;
+
+    if (config && typeof config === 'object') {
+      return { ...config, configPath: filePath };
     }
 
     return { configPath: filePath };
   } catch {
+    console.error(
+      `\n  ${red(bold('Error:'))} Invalid config file: ${cyan(filePath)}`,
+    );
     return { configPath: filePath };
   }
 }

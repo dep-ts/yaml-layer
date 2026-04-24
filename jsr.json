@@ -1,6 +1,6 @@
 {
   "name": "@dep/yaml-layer",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A lightweight Deno-based tool that transforms YAML content into typed JSON artifacts and generates a central TypeScript entry point for easy data access.",
   "exports": {
     ".": "./src/mod.ts",

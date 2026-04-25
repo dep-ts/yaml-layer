@@ -94,6 +94,24 @@ await builder();
 await watcher();
 ```
 
+### Consuming Data 📦
+
+Once the artifacts are generated, simply import the grouped constants directly into your application
+
+```typescript
+// Import the generated constants from your outDir (e.g., ./.gen/main.ts)
+import { WikiGuides, WikiRoot } from './.gen/main.ts';
+
+// Single entry access (e.g., a landing page config)
+const siteConfig = WikiRoot[0];
+console.log(`Welcome to ${siteConfig.title}`);
+
+// Collection iteration (e.g., a blog or documentation list)
+WikiGuides.forEach((page) => {
+  console.log(`- ${page.title} (ID: ${page._slug})`);
+});
+```
+
 ---
 
 ## License 📄

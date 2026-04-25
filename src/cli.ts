@@ -74,5 +74,3 @@ try {
   }
   throw err;
 }
-
-// deno install --global --allow-all -f -n yaml-layer ./src/cli.ts

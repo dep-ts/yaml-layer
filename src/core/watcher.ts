@@ -7,32 +7,28 @@ import { bold, cyan, dim, green } from '@std/fmt/colors';
 import { logDirNotFound, logUpdate } from '@/utils/log.ts';
 
 /**
- * Watches a content directory for YAML file changes and rebuilds generated artifacts.
+ * Watches for YAML changes and rebuilds artifacts automatically.
  *
- * The function performs an initial build using `builder`, then listens for filesystem
- * events inside the content directory. When a `.yaml` or `.yml` file change is detected,
- * it debounces the event and runs the build process again, logging the updated file.
- *
- * @param opt Optional configuration passed directly to the builder, including content/output directories and exclusion patterns.
- * @returns Resolves only if the watcher loop exits (normally it runs indefinitely).
- * @throws Propagates filesystem or build errors produced by `Deno.watchFs` or `builder`.
+ * @param config Configuration for directories, validation, and transformations.
+ * @returns Resolves if the watch process is terminated.
+ * @throws Propagates filesystem watcher or builder execution errors.
  *
  * @example
  * ```ts
- * import { watcher } from "@dep/yaml-layer";
- * import { s } from "@dep/schema";
+ * import { watcher } from '@dep/yaml-layer';
+ * import { s } from '@dep/schema';
  *
  * await watcher({
- *  contentDir: './docs',
- *  outDir: './dist/data',
- *  schema: s.object({
- *    title: s.string(),
- *   date: s.date(),
- * }),
- *  transform: (data) => ({
- *    ...data,
- *    year: new Date(data.date).getFullYear(),
- *  }),
+ *  docType: 'Service',
+ *  contentDir: './content/services',
+ *  outDir: './dist/services',
+ *  exclude: ['temp'],
+ *  schemas: {
+ *    ServiceWebs: s.object({ title: s.string() }),
+ *  },
+ *  transforms: {
+ *    ServiceWebs: (data) => ({ ...data, updated: true }),
+ *  },
  * });
  * ```
  */

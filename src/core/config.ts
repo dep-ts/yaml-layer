@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import type { ObjectSchema } from '@dep/schema';
+// import type { ObjectSchema } from '@dep/schema';
 import { resolveConfigPath } from '@/utils/path.ts';
 import { toFileUrl } from '@dep/path';
 import { bold, cyan, red } from '@std/fmt/colors';
@@ -27,12 +27,18 @@ export interface YamlLayerConfig<T = any> {
   outDir?: string;
   /** The base name for the exported TypeScript constants. Defaults to `Content`. */
   docType?: string;
-  /** List of path patterns to ignore during the scan. */
+  /** Substrings to ignore in file paths (e.g., ['_drafts', '.temp']). */
   exclude?: Array<string>;
-  /** A synchronous or asynchronous function to modify data after parsing but before writing to disk. */
-  transform?: (entry: ContentEntry) => T | Promise<T>;
-  /** A validation schema (e.g., from `@dep/schema`) to enforce structure on the YAML data. */
-  schema?: ObjectSchema;
+  /** Functions to transform parsed data before it is saved to disk. */
+  transforms?: Record<string, (entry: ContentEntry) => T | Promise<T>>;
+  /** Validation schemas (e.g., from `@dep/schema`) to enforce structure per group. */
+  schemas?: Record<
+    string,
+    {
+      parseAsync: (data: unknown) => Promise<Record<PropertyKey, any>>;
+      type: 'object';
+    }
+  >;
 }
 /**
  * Helper function to provide type-safety when defining a configuration file.

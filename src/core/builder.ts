@@ -6,40 +6,33 @@ import * as fs from '@std/fs';
 import * as path from '@dep/path';
 import { formatPathIdentifier } from '@/utils/format.ts';
 import { logDirNotFound } from '@/utils/log.ts';
-
 import { generateJsonImports, ImportsMap } from '@/utils/main.ts';
 import { YamlLayerConfig } from './config.ts';
-import { ContentEntry } from '@dep/yaml-layer';
-import { s } from '@dep/schema';
+import { hasUnknown } from '@/utils/unknown.ts';
 
 /**
- * Builds JSON artifacts from YAML files and generates an import map for them.
+ * Compiles YAML files into JSON artifacts with schema validation and import maps.
  *
- * The function scans a content directory for `.yaml` and `.yml` files, parses them,
- * writes JSON versions into a generated directory, and creates grouped import
- * definitions for use in code. A cache based on file modification time prevents
- * regenerating unchanged files.
- *
- * @param opt Optional configuration controlling input directory, output directory, exclusion patterns, and document type grouping.
- * @returns Resolves when the build process completes.
- * @throws Will propagate filesystem or parsing errors that occur during reading, writing, or directory creation.
+ * @param config Configuration for directories, validation, and transformations.
+ * @returns Resolves when the build and cache update are complete.
+ * @throws Propagates errors from file access, YAML parsing, or schema validation.
  *
  * @example
  * ```ts
- * import { builder } from "@dep/yaml-layer";
- * import { s } from "@dep/schema";
+ * import { builder } from '@dep/yaml-layer';
+ * import { s } from '@dep/schema';
  *
  * await builder({
- *  contentDir: './docs',
- *  outDir: './dist/data',
- *  schema: s.object({
- *    title: s.string(),
- *   date: s.date(),
- * }),
- *  transform: (data) => ({
- *    ...data,
- *    year: new Date(data.date).getFullYear(),
- *  }),
+ *  docType: 'Service',
+ *  contentDir: './content/services',
+ *  outDir: './dist/services',
+ *  exclude: ['temp'],
+ *  schemas: {
+ *    ServiceWebs: s.object({ title: s.string() }),
+ *  },
+ *  transforms: {
+ *    ServiceWebs: (data) => ({ ...data, updated: true }),
+ *  },
  * });
  * ```
  */
@@ -48,6 +41,13 @@ export async function builder(config: YamlLayerConfig = {}): Promise<void> {
   const outDir = config.outDir ?? '.yaml-layer';
   const docType = config.docType ?? 'Content';
   const exclude = config.exclude ?? [];
+  const schemas = config.schemas ?? {};
+  const transforms = config.transforms ?? {};
+
+  if (!fs.existsSync(contentDir)) {
+    logDirNotFound(contentDir);
+    return;
+  }
 
   const configHash = (async () => {
     if ('configPath' in config && typeof config.configPath === 'string') {
@@ -62,13 +62,12 @@ export async function builder(config: YamlLayerConfig = {}): Promise<void> {
   const absoluteContentPath = path.resolve(contentDir);
   let hasChanges = false;
 
-  if (!fs.existsSync(contentDir)) {
-    logDirNotFound(contentDir);
-    return;
-  }
-
   for await (const entry of fs.expandGlob(`${contentDir}/**/*.+(yaml|yml)`)) {
-    if (exclude.some((term) => entry.path.includes(term))) {
+    if (
+      exclude.some((term) =>
+        path.relative(absoluteContentPath, entry.path).includes(term)
+      )
+    ) {
       continue;
     }
 
@@ -84,34 +83,39 @@ export async function builder(config: YamlLayerConfig = {}): Promise<void> {
     const importIdentifier = slug(jsonFile, { separator: '' });
 
     if (cachedMtime !== mtimeNum || cachedConfig !== (await configHash)) {
+      const { _slug, _filePath, _raw, ...rest } = await parseYAML(entry);
+      let yamlData = rest;
       hasChanges = true;
-      let yamlData = await parseYAML(entry);
 
-      if (config.schema) {
-        yamlData = config.schema
-          .extend({
-            _slug: s.string(),
-            _filePath: s.string(),
-            _raw: s.string(),
-          })
-          .parse(yamlData) as ContentEntry;
+      if (schemas[groupName]) {
+        yamlData = await schemas[groupName].parseAsync(yamlData);
       }
 
-      const finalData = config.transform
-        ? await config.transform(yamlData)
-        : yamlData;
+      if (transforms[groupName]) {
+        yamlData = await transforms[groupName]({
+          ...yamlData,
+          _slug,
+          _filePath,
+          _raw,
+        });
+      } else {
+        yamlData = { ...yamlData, _slug, _filePath, _raw };
+      }
 
       if (!fs.existsSync(path.join(outDir, internalDir))) {
         await Deno.mkdir(path.join(outDir, internalDir), { recursive: true });
       }
 
-      await Deno.writeTextFile(outputPath, JSON.stringify(finalData, null, 2));
+      await Deno.writeTextFile(outputPath, JSON.stringify(yamlData, null, 2));
       await cache.set(entry.path, mtimeNum);
     }
 
     importsMap[groupName] ??= {};
     importsMap[groupName][importIdentifier] = `./${jsonFile}`;
   }
+
+  if (hasUnknown('schema', schemas, importsMap)) return;
+  if (hasUnknown('transform', transforms, importsMap)) return;
 
   if (hasChanges) {
     await generateJsonImports(importsMap, outDir);
